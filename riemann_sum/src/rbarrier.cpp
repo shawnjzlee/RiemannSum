@@ -23,3 +23,11 @@ bool rbarrier::rbarrier_wait (const b_fn& condition,
     
     return true;
 }
+
+void rbarrier::barrier_rc (int rc) {
+    if (rc != 0 && rc != PTHREAD_BARRIER_SERIAL_THREAD)
+    {
+        cout << "Could not wait on barrier\n";
+        exit(-1);
+    }
+}

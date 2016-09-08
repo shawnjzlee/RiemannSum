@@ -14,6 +14,8 @@ class rbarrier
                            const v_fn& callback);
                             
         int rbarrier_init(int num_threads);
+        
+        void barrier_rc (int rc);
                             
     private:
         pthread_barrier_t barrier;

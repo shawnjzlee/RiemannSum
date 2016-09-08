@@ -18,15 +18,6 @@ using namespace std::chrono;
 
 rbarrier rbarrier;
 
-void 
-barrier_rc (int rc) {
-    if (rc != 0 && rc != PTHREAD_BARRIER_SERIAL_THREAD)
-    {
-        cout << "Could not wait on barrier\n";
-        exit(-1);
-    }
-}
-
 void get_global_total (vector<thread_data> thread_data_vector) {
     double sum = 0.0;
     int num_threads = thread_data_vector.at(0).get_num_threads();
@@ -104,7 +95,7 @@ int main(int argc, char * argv[]) {
     const double width = (r_bound - l_bound) / (double)partition_sz;
     
     rc = rbarrier.rbarrier_init(num_threads);
-    barrier_rc(rc);
+    rbarrier.barrier_rc(rc);
     
     vector<thread_data> thread_data_vector(num_threads);
     for(int i = 0; i < num_threads; ++i) {
