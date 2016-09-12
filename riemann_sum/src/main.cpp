@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <functional>
 #include <algorithm>
+#include <utility>
 
 #include <pthread.h>
 #include "rbarrier.cpp"
@@ -32,22 +33,23 @@ double thread_get_width (vector<thread_data> thread_data_vector, int index) {
 }
 
 void get_total (vector<thread_data> thread_data_vector, int index) {
-    thread_data current_thread = thread_data_vector.at(index);
+    unique_ptr<thread_data> current_thread(&thread_data_vector.at(index));
+    //current_thread = &thread_data_vector.at(index);
     short tid = 0;
-    tid = current_thread.get_tid();
+    tid = current_thread->get_tid();
     
     high_resolution_clock::time_point start;
     if (tid == 0) 
         start = high_resolution_clock::now();
         
-    current_thread.do_work();
+    current_thread->do_work();
     
     rbarrier.rbarrier_wait(
-        [current_thread, thread_data_vector] (void)->bool {
-            return current_thread.get_sharing_condition(thread_data_vector);
+        [&current_thread, thread_data_vector] (void)->bool {
+            return current_thread->get_sharing_condition(thread_data_vector);
         } , 
-        [current_thread, thread_data_vector] (void) {
-            current_thread.callback(thread_data_vector);
+        [&current_thread, thread_data_vector] (void) {
+            current_thread->callback(thread_data_vector);
         } );
 
     if (tid == 0) {
@@ -60,8 +62,8 @@ void get_total (vector<thread_data> thread_data_vector, int index) {
 int main(int argc, char * argv[]) {
     
     ifstream instream;
-    int num_threads, l_bound, r_bound, partition_sz, rc, remaining_parts, index,
-        i = 0, j = 0;
+    int num_threads = 0, l_bound = 0, r_bound = 0, partition_sz =0, rc = 0, 
+        remaining_parts = 0, index = 0, i = 0, j = 0;
     double normal_dist = 0.0, init_dist = 0.0;
     
     if(argc != 5) {

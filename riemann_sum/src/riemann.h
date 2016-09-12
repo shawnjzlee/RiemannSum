@@ -13,6 +13,9 @@ class thread_data {
         thread_data();
         ~thread_data();
         
+        thread_data(thread_data &&);
+        thread_data(const thread_data &);
+        
         void thread_data_init(int _num_threads, bool _sharing_flag);
         
         double func(double value);
@@ -37,7 +40,7 @@ class thread_data {
         int get_working_partitions();
         
     private:
-        mutex do_work_mutex;
+        mutable mutex do_work_mutex;
     
         short thread_id;                    /* Stores thread_id */
         int num_threads;                    /* Stores the number of threads */
