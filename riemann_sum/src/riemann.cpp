@@ -10,40 +10,28 @@ thread_data::thread_data(thread_data &&other) {
     lock_guard<mutex> lock(other.do_work_mutex);
     thread_id = move(other.thread_id);
     other.thread_id = 0;
-    
     num_threads = move(other.num_threads);
     other.num_threads = 0;
-    
     lbound = move(other.lbound);
     other.lbound = 0;
-    
     rbound = move(other.rbound);
     other.rbound = 0;
-    
     stolen_index = move(other.stolen_index);
     other.stolen_index = 0;
-    
     stolen_location = move(other.stolen_location);
     other.stolen_location = 0;
-    
     stolen_parts = move(other.stolen_parts);
     other.stolen_parts = 0;
-    
     width = move(other.width);
     other.width = 0;
-    
     local_sum = move(other.local_sum);
     other.local_sum = 0;
-    
     curr_location = move(other.curr_location);
     other.curr_location = 0;
-    
     parts = move(other.parts);
     other.parts = 0;
-    
     cond = move(other.cond);
     other.cond = 0;
-    
     sharing_flag = move(other.sharing_flag);
     other.sharing_flag = 0;
 }
@@ -64,6 +52,63 @@ thread_data::thread_data(const thread_data &other) {
     parts = other.parts;
     cond = other.cond;
     sharing_flag = other.sharing_flag;
+}
+
+//move assignment
+thread_data& thread_data::operator=(thread_data &&other) {
+    lock(do_work_mutex, other.do_work_mutex);
+    lock_guard<mutex> self_lock(do_work_mutex, adopt_lock);
+    lock_guard<mutex> other_lock(other.do_work_mutex, adopt_lock);
+    thread_id = move(other.thread_id);
+    other.thread_id = 0;
+    num_threads = move(other.num_threads);
+    other.num_threads = 0;
+    lbound = move(other.lbound);
+    other.lbound = 0;
+    rbound = move(other.rbound);
+    other.rbound = 0;
+    stolen_index = move(other.stolen_index);
+    other.stolen_index = 0;
+    stolen_location = move(other.stolen_location);
+    other.stolen_location = 0;
+    stolen_parts = move(other.stolen_parts);
+    other.stolen_parts = 0;
+    width = move(other.width);
+    other.width = 0;
+    local_sum = move(other.local_sum);
+    other.local_sum = 0;
+    curr_location = move(other.curr_location);
+    other.curr_location = 0;
+    parts = move(other.parts);
+    other.parts = 0;
+    cond = move(other.cond);
+    other.cond = 0;
+    sharing_flag = move(other.sharing_flag);
+    other.sharing_flag = 0;
+    
+    return * this;
+}
+
+//copy assignment
+thread_data& thread_data::operator=(const thread_data &other) {
+    lock(do_work_mutex, other.do_work_mutex);
+    lock_guard<mutex> self_lock(do_work_mutex, adopt_lock);
+    lock_guard<mutex> other_lock(other.do_work_mutex, adopt_lock);
+    thread_id = other.thread_id;
+    num_threads = other.num_threads;
+    lbound = other.lbound;
+    rbound = other.rbound;
+    stolen_index = other.stolen_index;
+    stolen_location = other.stolen_location;
+    stolen_parts = other.stolen_parts;
+    width = other.width;
+    local_sum = other.local_sum;
+    curr_location = other.curr_location;
+    parts = other.parts;
+    cond = other.cond;
+    sharing_flag = other.sharing_flag;
+    
+    return * this;
 }
 
 void thread_data::thread_data_init(int _num_threads, bool _sharing_flag) {

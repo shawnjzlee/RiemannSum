@@ -33,8 +33,9 @@ double thread_get_width (vector<thread_data> thread_data_vector, int index) {
 }
 
 void get_total (vector<thread_data> thread_data_vector, int index) {
-    unique_ptr<thread_data> current_thread(&thread_data_vector.at(index));
-    //current_thread = &thread_data_vector.at(index);
+    // unique_ptr<thread_data> current_thread(&thread_data_vector.at(index));
+    thread_data * current_thread = &thread_data_vector.at(index);
+    
     short tid = 0;
     tid = current_thread->get_tid();
     

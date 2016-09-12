@@ -15,6 +15,8 @@ class thread_data {
         
         thread_data(thread_data &&);
         thread_data(const thread_data &);
+        thread_data& operator=(thread_data &&);
+        thread_data& operator=(const thread_data &);
         
         void thread_data_init(int _num_threads, bool _sharing_flag);
         
