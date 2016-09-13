@@ -62,10 +62,9 @@ class thread_data {
                                                is working in */
         
         bool cond;                          /* Flags the condition of the thread */
-        bool sharing_flag;                /* Passed in as cmd line argument; enables/disables sharing */
+        bool sharing_flag;                  /* Passed in as cmd line argument; enables/disables sharing */
         
-        char buffer[200];                   /* Buffer that prevents false sharing on the cache line */
-    
+        vector<int> buffer = vector<int>(200);           /* Buffer that prevents false sharing on the cache line */
 };
 
 #endif /* riemann.h */

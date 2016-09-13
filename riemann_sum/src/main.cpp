@@ -23,6 +23,7 @@ void get_global_total (vector<thread_data> thread_data_vector) {
     double sum = 0.0;
     int num_threads = thread_data_vector.at(0).get_num_threads();
     for(int i = 0; i < num_threads; i++) {
+        // cout << thread_data_vector.at(i).get_local_sum() << endl;
         sum += thread_data_vector.at(i).get_local_sum();
     }
     cout << "The integral is: " << sum;
@@ -46,12 +47,17 @@ void get_total (vector<thread_data> thread_data_vector, int index) {
     current_thread->do_work();
     
     rbarrier.rbarrier_wait(
-        [&current_thread, thread_data_vector] (void)->bool {
+        [&current_thread, &thread_data_vector] (void)->bool {
             return current_thread->get_sharing_condition(thread_data_vector);
         } , 
-        [&current_thread, thread_data_vector] (void) {
+        [&current_thread, &thread_data_vector] (void) {
             current_thread->callback(thread_data_vector);
         } );
+
+    // cout << thread_data_vector.at(0).get_local_sum() << endl;
+    // cout << thread_data_vector.at(1).get_local_sum() << endl;
+    // cout << thread_data_vector.at(2).get_local_sum() << endl;
+    // cout << thread_data_vector.at(3).get_local_sum() << endl;
 
     if (tid == 0) {
         high_resolution_clock::time_point end = high_resolution_clock::now();
@@ -163,7 +169,7 @@ int main(int argc, char * argv[]) {
                 i += normal_dist;
             }
             thread_data_vector[index].set_width(width);
-            threads[i] = thread(get_total, thread_data_vector, i);
+            threads[index] = thread(get_total, thread_data_vector, index);
         }
         for (j = 0; j < num_ext_parts; i += ext_dist, j++, index++)
         {
@@ -173,12 +179,12 @@ int main(int argc, char * argv[]) {
             thread_data_vector[index].set_curr_location(l_bound + (width * normal_dist * index) + (width * (init_dist - normal_dist)));
             thread_data_vector[index].set_working_partitions(ext_dist);
             thread_data_vector[index].set_width(width);
-            threads[i] = thread(get_total, thread_data_vector, i);
+            threads[index] = thread(get_total, thread_data_vector, index);
         }
     }
-
+    
     for_each (threads.begin(), threads.end(), mem_fn(&thread::join));
-
+    
     get_global_total(thread_data_vector);
     
     return EXIT_SUCCESS;

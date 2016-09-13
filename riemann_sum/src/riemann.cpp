@@ -34,6 +34,7 @@ thread_data::thread_data(thread_data &&other) {
     other.cond = 0;
     sharing_flag = move(other.sharing_flag);
     other.sharing_flag = 0;
+    buffer = move(other.buffer);
 }
 
 //copy init
@@ -52,6 +53,7 @@ thread_data::thread_data(const thread_data &other) {
     parts = other.parts;
     cond = other.cond;
     sharing_flag = other.sharing_flag;
+    buffer = other.buffer;
 }
 
 //move assignment
@@ -85,7 +87,7 @@ thread_data& thread_data::operator=(thread_data &&other) {
     other.cond = 0;
     sharing_flag = move(other.sharing_flag);
     other.sharing_flag = 0;
-    
+    buffer = move(other.buffer);
     return * this;
 }
 
@@ -107,7 +109,7 @@ thread_data& thread_data::operator=(const thread_data &other) {
     parts = other.parts;
     cond = other.cond;
     sharing_flag = other.sharing_flag;
-    
+    buffer = other.buffer;
     return * this;
 }
 
