@@ -17,48 +17,27 @@
 using namespace std;
 using namespace std::chrono;
 
-rbarrier rbarrier;
+RBarrier rbarrier;
 
-void get_global_total (vector<thread_data> thread_data_vector) {
-    double sum = 0.0;
-    int num_threads = thread_data_vector.at(0).get_num_threads();
-    for(int i = 0; i < num_threads; i++) {
-        // cout << thread_data_vector.at(i).get_local_sum() << endl;
-        sum += thread_data_vector.at(i).get_local_sum();
-    }
-    cout << "The integral is: " << sum;
-}
+void get_total (vector<ThreadData> &thread_data_vector, int index) {
+    unique_ptr<ThreadData> current_thread(&(thread_data_vector.at(index)));
 
-double thread_get_width (vector<thread_data> thread_data_vector, int index) {
-    return thread_data_vector.at(index).get_rbound() - thread_data_vector.at(index).get_lbound();
-}
-
-void get_total (vector<thread_data> thread_data_vector, int index) {
-    // unique_ptr<thread_data> current_thread(&thread_data_vector.at(index));
-    thread_data * current_thread = &thread_data_vector.at(index);
-    
-    short tid = 0;
-    tid = current_thread->get_tid();
+    short tid = (*current_thread).get_thread_id();
     
     high_resolution_clock::time_point start;
     if (tid == 0) 
         start = high_resolution_clock::now();
         
-    current_thread->do_work();
+    (*current_thread).do_work();
     
     rbarrier.rbarrier_wait(
         [&current_thread, &thread_data_vector] (void)->bool {
-            return current_thread->get_sharing_condition(thread_data_vector);
-        } , 
+            return (*current_thread).get_sharing_condition(ref(thread_data_vector));
+        } ,
         [&current_thread, &thread_data_vector] (void) {
-            current_thread->callback(thread_data_vector);
+            (*current_thread).callback(ref(thread_data_vector));
         } );
-
-    // cout << thread_data_vector.at(0).get_local_sum() << endl;
-    // cout << thread_data_vector.at(1).get_local_sum() << endl;
-    // cout << thread_data_vector.at(2).get_local_sum() << endl;
-    // cout << thread_data_vector.at(3).get_local_sum() << endl;
-
+        
     if (tid == 0) {
         high_resolution_clock::time_point end = high_resolution_clock::now();
         duration<double> runtime = duration_cast<duration<double>>(end - start);
@@ -67,11 +46,7 @@ void get_total (vector<thread_data> thread_data_vector, int index) {
 }
 
 int main(int argc, char * argv[]) {
-    
     ifstream instream;
-    int num_threads = 0, l_bound = 0, r_bound = 0, partition_sz =0, rc = 0, 
-        remaining_parts = 0, index = 0, i = 0, j = 0;
-    double normal_dist = 0.0, init_dist = 0.0;
     
     if(argc != 5) {
         cout << "Not enough arguments.\n Requires [input file] "
@@ -86,8 +61,10 @@ int main(int argc, char * argv[]) {
         return -1;
     }
     
+    int l_bound, r_bound, partition_sz;
     instream >> l_bound >> r_bound >> partition_sz;
     
+    int num_threads = 0;
     if(atoi(argv[2]) == 0) num_threads = 1;
     // else if(atoi(argv[2]) > thread::hardware_concurrency()) {
     //     cout << "num_threads set to maximum supported concurrent threads"
@@ -99,40 +76,43 @@ int main(int argc, char * argv[]) {
     if(num_threads > partition_sz) num_threads = partition_sz;
     
     const int dist_multiplier = atoi(argv[3]);
-    const bool sharing_flag = atoi(argv[4]);
+    const bool can_share = atoi(argv[4]);
     
     const double width = (r_bound - l_bound) / (double)partition_sz;
     
-    rc = rbarrier.rbarrier_init(num_threads);
+    int rc = rbarrier.rbarrier_init(num_threads);
     rbarrier.barrier_rc(rc);
     
-    vector<thread_data> thread_data_vector(num_threads);
+    vector<ThreadData> thread_data_vector(num_threads);
     for(int i = 0; i < num_threads; ++i) {
-        thread_data_vector.at(i).thread_data_init(num_threads, sharing_flag);
+        thread_data_vector.at(i).thread_data_init(num_threads, can_share);
     }
     
     vector<thread> threads(num_threads);
     
-    if (partition_sz  % (num_threads + dist_multiplier))
-        remaining_parts = partition_sz  % (num_threads - 1);
- 
+    int remaining_parts = 0;
+    if (partition_sz % (num_threads + dist_multiplier))
+        remaining_parts = partition_sz % (num_threads - 1);
+    
+    double normal_dist = 0.0, init_dist = 0.0;
     if (dist_multiplier == 0) normal_dist = partition_sz / num_threads;
     else {
         init_dist = dist_multiplier * (partition_sz / (num_threads + dist_multiplier));
         normal_dist = (partition_sz - init_dist) / (num_threads - 1);
     }
+    
     double ext_dist = normal_dist + 1;
     int num_norm_parts = partition_sz - remaining_parts;
     int num_ext_parts = partition_sz - num_norm_parts;
     
-    if(num_threads == 1) {
-        thread_data_vector[index].set_tid(index);
-        thread_data_vector[index].set_lbound(l_bound + (width * normal_dist * index));
-        thread_data_vector[index].set_rbound(l_bound + (width * normal_dist * (index + 1)));
-        thread_data_vector[index].set_curr_location(l_bound + (width * normal_dist * index));
+    int index = 0, i = 0, j = 0;
+    if (num_threads == 1) {
+        thread_data_vector[index].set_thread_id(index);
+        thread_data_vector[index].set_bounds(l_bound, r_bound);
+        thread_data_vector[index].set_curr_location(l_bound);
         thread_data_vector[index].set_working_partitions(normal_dist);
         thread_data_vector[index].set_width(width);
-        
+
         high_resolution_clock::time_point start;
         start = high_resolution_clock::now();
         
@@ -146,46 +126,53 @@ int main(int argc, char * argv[]) {
         for (i = 0; i < num_norm_parts, index < num_threads - remaining_parts; 
              index++)
         {
-            thread_data_vector[index].set_tid(index);
+            thread_data_vector[index].set_thread_id(index);
             if (dist_multiplier && (i == 0)) {
-                thread_data_vector[index].set_lbound(l_bound + (width * init_dist * index));
-                thread_data_vector[index].set_rbound(l_bound + (width * init_dist * (index + 1)));
-                thread_data_vector[index].set_curr_location(l_bound + (width * init_dist * index));
+                double local_lbound = l_bound + (width * init_dist * index);
+                double local_rbound = l_bound + (width * init_dist * (index + 1));
+                
+                thread_data_vector[index].set_bounds(local_lbound, local_rbound);
+                thread_data_vector[index].set_curr_location(local_lbound);
                 thread_data_vector[index].set_working_partitions(init_dist);
                 i += init_dist;
             }
             else if (dist_multiplier) {
-                thread_data_vector[index].set_lbound(l_bound + (width * normal_dist * index) + (width * (init_dist - normal_dist)));
-                thread_data_vector[index].set_rbound(l_bound + (width * normal_dist * (index + 1)) + (width * (init_dist - normal_dist)));
-                thread_data_vector[index].set_curr_location(l_bound + (width * normal_dist * index) + (width * (init_dist - normal_dist)));
+                double local_lbound = l_bound + (width * normal_dist * index) + (width * (init_dist - normal_dist));
+                double local_rbound = l_bound + (width * normal_dist * (index + 1)) + (width * (init_dist - normal_dist));
+                
+                thread_data_vector[index].set_bounds(local_lbound, local_rbound);
+                thread_data_vector[index].set_curr_location(local_lbound);
                 thread_data_vector[index].set_working_partitions(normal_dist);
                 i += normal_dist;
             }
             else {
-                thread_data_vector[index].set_lbound(l_bound + (width * normal_dist * index));
-                thread_data_vector[index].set_rbound(l_bound + (width * normal_dist * (index + 1)));
-                thread_data_vector[index].set_curr_location(l_bound + (width * normal_dist * index));
+                double local_lbound = l_bound + (width * normal_dist * index);
+                double local_rbound = l_bound + (width * normal_dist * (index + 1));
+                
+                thread_data_vector[index].set_bounds(local_lbound, local_rbound);
+                thread_data_vector[index].set_curr_location(local_lbound);
                 thread_data_vector[index].set_working_partitions(normal_dist);
                 i += normal_dist;
             }
             thread_data_vector[index].set_width(width);
-            threads[index] = thread(get_total, thread_data_vector, index);
+            threads[index] = thread(get_total, ref(thread_data_vector), index);
         }
         for (j = 0; j < num_ext_parts; i += ext_dist, j++, index++)
         {
-            thread_data_vector[index].set_tid(index);
-            thread_data_vector[index].set_lbound(l_bound + (width * ext_dist * index) + (width * (init_dist - normal_dist)));
-            thread_data_vector[index].set_rbound(l_bound + (width * ext_dist * (index + 1)) + (width * (init_dist - normal_dist)));
+            thread_data_vector[index].set_thread_id(index);
+            thread_data_vector[index].set_bounds(l_bound + (width * ext_dist * index) + (width * (init_dist - normal_dist)),
+                                                 l_bound + (width * ext_dist * (index + 1)) + (width * (init_dist - normal_dist)));
             thread_data_vector[index].set_curr_location(l_bound + (width * normal_dist * index) + (width * (init_dist - normal_dist)));
             thread_data_vector[index].set_working_partitions(ext_dist);
             thread_data_vector[index].set_width(width);
-            threads[index] = thread(get_total, thread_data_vector, index);
+            
+            threads[index] = thread(get_total, ref(thread_data_vector), index);
         }
     }
     
-    for_each (threads.begin(), threads.end(), mem_fn(&thread::join));
+    for_each(threads.begin(), threads.end(), mem_fn(&thread::join));
     
-    get_global_total(thread_data_vector);
+    // get_global_total(thread_data_vector);
     
     return EXIT_SUCCESS;
 }

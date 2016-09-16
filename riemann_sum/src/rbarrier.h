@@ -3,11 +3,11 @@
 
 using namespace std;
 
-class rbarrier
+class RBarrier
 {
     public:
-        rbarrier();
-        ~rbarrier();
+        RBarrier();
+        ~RBarrier();
 
         template <typename b_fn, typename v_fn>
         bool rbarrier_wait(const b_fn& condition,

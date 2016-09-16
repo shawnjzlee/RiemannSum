@@ -1,19 +1,19 @@
 #include "rbarrier.h"
 using namespace std;
 
-rbarrier::rbarrier() { }
+RBarrier::RBarrier() { }
 
-rbarrier::~rbarrier() {
+RBarrier::~RBarrier() {
     pthread_barrier_destroy(&barrier);
 }
 
-int rbarrier::rbarrier_init(int num_threads) {
+int RBarrier::rbarrier_init(int num_threads) {
     int rc = pthread_barrier_init(&barrier, NULL, num_threads);
     return rc;
 }
 
 template <typename b_fn, typename v_fn>
-bool rbarrier::rbarrier_wait (const b_fn& condition,
+bool RBarrier::rbarrier_wait (const b_fn& condition,
                               const v_fn& callback) {
                          
     const bool result = condition ();
@@ -24,7 +24,7 @@ bool rbarrier::rbarrier_wait (const b_fn& condition,
     return true;
 }
 
-void rbarrier::barrier_rc (int rc) {
+void RBarrier::barrier_rc (int rc) {
     if (rc != 0 && rc != PTHREAD_BARRIER_SERIAL_THREAD)
     {
         cout << "Could not wait on barrier\n";

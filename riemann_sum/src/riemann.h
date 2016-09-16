@@ -8,38 +8,38 @@
 
 using namespace std;
 
-class thread_data {
+class ThreadData {
     public:
-        thread_data();
-        ~thread_data();
+        ThreadData();
+        ~ThreadData();
         
-        thread_data(thread_data &&);
-        thread_data(const thread_data &);
-        thread_data& operator=(thread_data &&);
-        thread_data& operator=(const thread_data &);
+        // thread_data(thread_data &&);
+        // thread_data(const thread_data &);
+        // thread_data& operator=(thread_data &&);
+        // thread_data& operator=(const thread_data &);
         
-        void thread_data_init(int _num_threads, bool _sharing_flag);
+        void thread_data_init(int, bool);
         
         double func(double value);
-        bool get_sharing_condition(vector<thread_data> thread_data_vector);
-        void callback(vector<thread_data> thread_data_vector);
+        bool get_sharing_condition(vector<ThreadData> &);
+        void callback(vector<ThreadData> &);
         void do_work();
         
-        void set_tid(int _index);
-        short get_tid();
-        int get_num_threads();
-        double get_lbound();
-        void set_lbound(double _lbound);
-        double get_rbound();
-        void set_rbound(double _rbound);
-        void set_width(double _width);
-        double get_width();
-        void update_sum(double local_lbound);
-        double get_local_sum();
-        void set_curr_location(int location);
-        int get_curr_location();
-        void set_working_partitions(int _parts);
-        int get_working_partitions();
+        short get_thread_id() const;
+        void set_thread_id(int);
+        
+        int get_lbound() const;
+        int get_rbound() const;
+        void set_bounds(double, double);
+        
+        int get_working_partitions() const;
+        void set_working_partitions(int);
+        
+        int get_curr_location() const;
+        void set_curr_location(int);
+        
+        double get_width() const;
+        void set_width(double);
         
     private:
         mutable mutex do_work_mutex;
@@ -49,8 +49,8 @@ class thread_data {
         double lbound;                      /* Stores global left bound */
         double rbound;                      /* Stores global right bound */
         
-        int stolen_index;
-        int stolen_location;
+        int stolen_thread_id;
+        int stolen_curr_location;
         int stolen_parts;
         
         double width;
@@ -60,11 +60,8 @@ class thread_data {
                                                working location */
         int parts;                          /* Total number of partitions the thread
                                                is working in */
-        
-        bool cond;                          /* Flags the condition of the thread */
-        bool sharing_flag;                  /* Passed in as cmd line argument; enables/disables sharing */
-        
-        vector<int> buffer = vector<int>(200);           /* Buffer that prevents false sharing on the cache line */
+        bool is_shared;                     /* Flags the condition of the thread */
+        bool can_share;                     /* Passed in as cmd line argument; enables/disables sharing */
 };
 
 #endif /* riemann.h */
