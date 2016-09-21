@@ -101,3 +101,7 @@ double ThreadData::get_width() const {
 void ThreadData::set_width(double width) {
     this->width = width;
 }
+
+double ThreadData::get_local_sum() const {
+    return local_sum;
+}

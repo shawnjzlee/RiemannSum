@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <vector>
 
+#include <mutex>
 #include <thread>
 #include <chrono>
 #include <cstdio>
@@ -18,6 +19,14 @@ using namespace std;
 using namespace std::chrono;
 
 RBarrier rbarrier;
+
+void get_global_total (vector<ThreadData> &thread_data_vector) {
+    double sum = 0.0;
+    for (int i = 0; i < thread_data_vector.size(); i++) {
+        sum += thread_data_vector[i].get_local_sum();
+    }
+    cout << "The integral is: " << sum;
+}
 
 void get_total (vector<ThreadData> &thread_data_vector, int index) {
     unique_ptr<ThreadData> current_thread(&(thread_data_vector.at(index)));
@@ -172,7 +181,7 @@ int main(int argc, char * argv[]) {
     
     for_each(threads.begin(), threads.end(), mem_fn(&thread::join));
     
-    // get_global_total(thread_data_vector);
+    get_global_total(ref(thread_data_vector));
     
     return EXIT_SUCCESS;
 }

@@ -1,22 +1,12 @@
 #ifndef RIEMANN_H
 #define RIEMANN_H
 
-#include <mutex>
-#include <vector>
-#include <unistd.h>
-#include <chrono>
-
 using namespace std;
 
 class ThreadData {
     public:
         ThreadData();
         ~ThreadData();
-        
-        // thread_data(thread_data &&);
-        // thread_data(const thread_data &);
-        // thread_data& operator=(thread_data &&);
-        // thread_data& operator=(const thread_data &);
         
         void thread_data_init(int, bool);
         
@@ -40,6 +30,8 @@ class ThreadData {
         
         double get_width() const;
         void set_width(double);
+        
+        double get_local_sum() const;
         
     private:
         mutable mutex do_work_mutex;
