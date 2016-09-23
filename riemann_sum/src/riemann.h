@@ -1,22 +1,22 @@
 #ifndef RIEMANN_H
 #define RIEMANN_H
 
+#include "thread_data.h"
 using namespace std;
 
-class ThreadData {
+class Riemann : public ThreadData {
     public:
-        ThreadData();
-        ~ThreadData();
+        Riemann();
+        ~Riemann();
         
         void thread_data_init(int, bool);
-        
-        double func(double value);
-        bool get_sharing_condition(vector<ThreadData> &);
-        void callback(vector<ThreadData> &);
-        void do_work();
-        
         short get_thread_id() const;
         void set_thread_id(int);
+        
+        double func(double value);
+        bool get_sharing_condition(vector<Riemann> &);
+        void callback(vector<Riemann> &);
+        void do_work();
         
         int get_lbound() const;
         int get_rbound() const;
@@ -34,10 +34,6 @@ class ThreadData {
         double get_local_sum() const;
         
     private:
-        mutable mutex do_work_mutex;
-    
-        short thread_id;                    /* Stores thread_id */
-        int num_threads;                    /* Stores the number of threads */
         double lbound;                      /* Stores global left bound */
         double rbound;                      /* Stores global right bound */
         
@@ -52,8 +48,6 @@ class ThreadData {
                                                working location */
         int parts;                          /* Total number of partitions the thread
                                                is working in */
-        bool is_shared;                     /* Flags the condition of the thread */
-        bool can_share;                     /* Passed in as cmd line argument; enables/disables sharing */
 };
 
 #endif /* riemann.h */

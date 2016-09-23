@@ -20,7 +20,7 @@ using namespace std::chrono;
 
 RBarrier rbarrier;
 
-void get_global_total (vector<ThreadData> &thread_data_vector) {
+void get_global_total (vector<Riemann> &thread_data_vector) {
     double sum = 0.0;
     for (int i = 0; i < thread_data_vector.size(); i++) {
         sum += thread_data_vector[i].get_local_sum();
@@ -28,8 +28,8 @@ void get_global_total (vector<ThreadData> &thread_data_vector) {
     cout << "The integral is: " << sum;
 }
 
-void get_total (vector<ThreadData> &thread_data_vector, int index) {
-    unique_ptr<ThreadData> current_thread(&(thread_data_vector.at(index)));
+void get_total (vector<Riemann> &thread_data_vector, int index) {
+    unique_ptr<Riemann> current_thread(&(thread_data_vector.at(index)));
 
     short tid = (*current_thread).get_thread_id();
     
@@ -92,7 +92,7 @@ int main(int argc, char * argv[]) {
     int rc = rbarrier.rbarrier_init(num_threads);
     rbarrier.barrier_rc(rc);
     
-    vector<ThreadData> thread_data_vector(num_threads);
+    vector<Riemann> thread_data_vector(num_threads);
     for(int i = 0; i < num_threads; ++i) {
         thread_data_vector.at(i).thread_data_init(num_threads, can_share);
     }
