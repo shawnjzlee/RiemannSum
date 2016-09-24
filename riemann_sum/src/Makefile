@@ -1,5 +1,5 @@
 COMPILE = g++-5
-FLAGS= -pthread -std=c++11
+FLAGS= -pthread -std=c++14
 DEBUG = -g
 FILE = main
 BUILD_DIR = ./bin

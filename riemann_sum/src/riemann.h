@@ -14,6 +14,7 @@ class Riemann : public ThreadData {
         void set_thread_id(int);
         
         double func(double value);
+        
         bool get_sharing_condition(vector<Riemann> &);
         void callback(vector<Riemann> &);
         void do_work();

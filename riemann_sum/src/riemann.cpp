@@ -20,6 +20,7 @@ bool Riemann::get_sharing_condition(vector<Riemann> &thread_data_vector) {
         for (stolen_thread_id = 0; stolen_thread_id < num_threads; stolen_thread_id++)
         {
             if(stolen_thread_id == thread_id) { continue; }
+            // lock_guard<mutex> lock(mutex_map.at(stolen_thread_id));
             // thread_data_vector[stolen_thread_id].do_work_mutex.lock();
             if((thread_data_vector[stolen_thread_id].curr_location < (thread_data_vector[stolen_thread_id].parts / 2)) 
                && thread_data_vector[stolen_thread_id].is_shared != 1)

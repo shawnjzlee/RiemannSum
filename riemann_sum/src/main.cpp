@@ -4,12 +4,14 @@
 #include <vector>
 
 #include <mutex>
+#include <memory>
 #include <thread>
 #include <chrono>
 #include <cstdio>
 #include <functional>
 #include <algorithm>
 #include <utility>
+#include <map>
 
 #include <pthread.h>
 #include "rbarrier.cpp"
@@ -19,6 +21,7 @@ using namespace std;
 using namespace std::chrono;
 
 RBarrier rbarrier;
+map<int, unique_ptr<mutex>> mutex_map;
 
 void get_global_total (vector<Riemann> &thread_data_vector) {
     double sum = 0.0;
@@ -164,6 +167,7 @@ int main(int argc, char * argv[]) {
                 i += normal_dist;
             }
             thread_data_vector[index].set_width(width);
+            mutex_map.emplace(index, make_unique<mutex>()).first;
             threads[index] = thread(get_total, ref(thread_data_vector), index);
         }
         for (j = 0; j < num_ext_parts; i += ext_dist, j++, index++)
@@ -175,6 +179,7 @@ int main(int argc, char * argv[]) {
             thread_data_vector[index].set_working_partitions(ext_dist);
             thread_data_vector[index].set_width(width);
             
+            mutex_map.emplace(index, make_unique<mutex>()).first;
             threads[index] = thread(get_total, ref(thread_data_vector), index);
         }
     }
