@@ -3,25 +3,21 @@
 #include <iomanip>
 #include <vector>
 
-#include <mutex>
-#include <memory>
 #include <thread>
 #include <chrono>
 #include <cstdio>
 #include <functional>
 #include <algorithm>
 #include <utility>
-#include <map>
 
-#include <pthread.h>
-#include "rbarrier.cpp"
-#include "riemann.cpp"
+#include "global.h"
+#include "riemann.h"
+#include "rbarrier.h"
 
 using namespace std;
 using namespace std::chrono;
 
 RBarrier rbarrier;
-map<int, unique_ptr<mutex>> mutex_map;
 
 void get_global_total (vector<Riemann> &thread_data_vector) {
     double sum = 0.0;

@@ -1,4 +1,7 @@
+#include <iostream>
+
 #include "rbarrier.h"
+
 using namespace std;
 
 RBarrier::RBarrier() { }

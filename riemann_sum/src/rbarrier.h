@@ -1,6 +1,8 @@
 #ifndef RBARRIER_H
 #define RBARRIER_H
 
+#include <pthread.h>
+
 using namespace std;
 
 class RBarrier

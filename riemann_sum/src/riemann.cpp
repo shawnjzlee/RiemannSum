@@ -1,4 +1,5 @@
 #include "riemann.h"
+#include "global.h"
 
 using namespace std;
 

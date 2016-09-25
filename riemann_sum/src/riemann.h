@@ -1,6 +1,8 @@
 #ifndef RIEMANN_H
 #define RIEMANN_H
 
+#include <vector>
+
 #include "thread_data.h"
 using namespace std;
 
