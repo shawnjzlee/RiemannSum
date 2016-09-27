@@ -15,6 +15,9 @@ class ThreadData {
         
         bool is_shared;
         bool can_share;
+        
+    private:
+        char buff[100];
 };
 
 #endif /* thread_data.h */
