@@ -120,6 +120,7 @@ int main(int argc, char * argv[]) {
         thread_data_vector[index].set_curr_location(l_bound);
         thread_data_vector[index].set_working_partitions(normal_dist);
         thread_data_vector[index].set_width(width);
+        mutex_map.emplace(index, make_unique<mutex>()).first;
 
         high_resolution_clock::time_point start;
         start = high_resolution_clock::now();
@@ -179,8 +180,8 @@ int main(int argc, char * argv[]) {
             threads[index] = thread(get_total, ref(thread_data_vector), index);
         }
     }
-    
-    for_each(threads.begin(), threads.end(), mem_fn(&thread::join));
+    if(num_threads != 1)
+        for_each(threads.begin(), threads.end(), mem_fn(&thread::join));
     
     get_global_total(ref(thread_data_vector));
     
