@@ -16,9 +16,9 @@ int RBarrier::rbarrier_init(int num_threads) {
     return rc;
 }
 
-template <typename b_fn, typename v_fn>
-bool RBarrier::rbarrier_wait (const b_fn& condition,
-                              const v_fn& callback) {
+// template <typename b_fn, typename v_fn>
+bool RBarrier::rbarrier_wait (function<bool ()> const &condition,
+                              function<void ()> const &callback) {
                          
     const bool result = condition ();
     

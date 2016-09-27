@@ -38,13 +38,13 @@ void get_total (vector<Riemann> &thread_data_vector, int index) {
         
     current_thread->do_work();
     
-    // rbarrier.rbarrier_wait(
-    //     [&current_thread, &thread_data_vector] (void)->bool {
-    //         return current_thread->get_sharing_condition(thread_data_vector);
-    //     } ,
-    //     [&current_thread, &thread_data_vector] (void) {
-    //         current_thread->callback(thread_data_vector);
-    //     } );
+    rbarrier.rbarrier_wait(
+        [&current_thread, &thread_data_vector] (void)->bool {
+            return current_thread->get_sharing_condition(thread_data_vector);
+        } ,
+        [&current_thread, &thread_data_vector] (void) {
+            current_thread->callback(thread_data_vector);
+        } );
         
     if (tid == 0) {
         high_resolution_clock::time_point end = high_resolution_clock::now();
