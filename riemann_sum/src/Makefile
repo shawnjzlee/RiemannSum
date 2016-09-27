@@ -63,3 +63,14 @@ check_r-nosharing:
 		n=`expr $$n + 1`; \
 	done; \
 	true
+
+n ?= 1
+check_r-multiplier:
+	n=$(n); \
+	while [ $${n} -le ${ARGS1} ] ; do \
+		echo $$n ; \
+		./$(EXECUTABLE) input.txt $${n} ${ARGS2} 0; \
+		echo ; \
+		n=`expr $$n + 1`; \
+	done; \
+	true
