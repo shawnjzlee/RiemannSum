@@ -47,7 +47,7 @@ check_r:
 	n=$(n); \
 	while [ $${n} -le ${ARGS} ] ; do \
 		echo $$n ; \
-		$(EXECUTABLE) input.txt $${n} 0 1; \
+		./$(EXECUTABLE) input.txt $${n} 0 1; \
 		echo ; \
 		n=`expr $$n + 1`; \
 	done; \
@@ -58,7 +58,7 @@ check_r-nosharing:
 	n=$(n); \
 	while [ $${n} -le ${ARGS} ] ; do \
 		echo $$n ; \
-		$(EXECUTABLE) input.txt $${n} 0 0; \
+		./$(EXECUTABLE) input.txt $${n} 0 0; \
 		echo ; \
 		n=`expr $$n + 1`; \
 	done; \
