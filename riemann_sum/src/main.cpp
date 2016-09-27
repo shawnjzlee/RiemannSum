@@ -18,6 +18,7 @@ using namespace std;
 using namespace std::chrono;
 
 RBarrier rbarrier;
+map<int, unique_ptr<mutex>> mutex_map;
 
 void get_global_total (vector<Riemann> &thread_data_vector) {
     double sum = 0.0;
@@ -28,23 +29,22 @@ void get_global_total (vector<Riemann> &thread_data_vector) {
 }
 
 void get_total (vector<Riemann> &thread_data_vector, int index) {
-    unique_ptr<Riemann> current_thread(&(thread_data_vector.at(index)));
-
-    short tid = (*current_thread).get_thread_id();
+    Riemann current_thread = thread_data_vector.at(index);
+    short tid = current_thread.get_thread_id();
     
     high_resolution_clock::time_point start;
     if (tid == 0) 
         start = high_resolution_clock::now();
         
-    (*current_thread).do_work();
+    current_thread.do_work();
     
-    rbarrier.rbarrier_wait(
-        [&current_thread, &thread_data_vector] (void)->bool {
-            return (*current_thread).get_sharing_condition(ref(thread_data_vector));
-        } ,
-        [&current_thread, &thread_data_vector] (void) {
-            (*current_thread).callback(ref(thread_data_vector));
-        } );
+    // rbarrier.rbarrier_wait(
+    //     [&current_thread, &thread_data_vector] (void)->bool {
+    //         return current_thread.get_sharing_condition(ref(thread_data_vector));
+    //     } ,
+    //     [&current_thread, &thread_data_vector] (void) {
+    //         current_thread.callback(ref(thread_data_vector));
+    //     } );
         
     if (tid == 0) {
         high_resolution_clock::time_point end = high_resolution_clock::now();

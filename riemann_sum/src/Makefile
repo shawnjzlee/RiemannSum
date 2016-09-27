@@ -1,45 +1,53 @@
-COMPILE = g++-5
-FLAGS= -pthread -std=c++14
-DEBUG = -g
-FILE = main
-BUILD_DIR = ./bin
+CC=g++-5
+CFLAGS=-c -std=c++14
+LDFLAGS=-pthread -lpthread
+SOURCES=main.cpp riemann.cpp rbarrier.cpp
+OBJECTS=$(SOURCES:.cpp=.o)
+EXECUTABLE=riemann
+BUILD_DIR=./bin
 
-all: clean
-	mkdir $(BUILD_DIR)
-	cp -f ./Makefile $(BUILD_DIR)/Makefile
-	cp -f ./input.txt $(BUILD_DIR)/input.txt
-	$(COMPILE) $(FLAGS) ./$(FILE).cpp -o $(BUILD_DIR)/$(FILE)
+all: $(SOURCES) $(EXECUTABLE)
+	
+debug: CFLAGS += -DDEBUG -g
+debug: $(EXECUTABLE)
+    
+$(EXECUTABLE): $(OBJECTS) copy
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $(BUILD_DIR)/$@
 
-debug: clean
-	mkdir $(BUILD_DIR)
-	cp -f ./Makefile $(BUILD_DIR)/Makefile
-	cp -f ./input.txt $(BUILD_DIR)/input.txt
-	$(COMPILE) $(FLAGS) -g ./$(FILE).cpp -o $(BUILD_DIR)/$(FILE)
-
+.cpp.o:
+	$(CC) $(CFLAGS) $< -o $@
+	
 clean:
+	rm *.o
 	rm -rf $(BUILD_DIR)
 	
+copy:
+	mkdir -p $(BUILD_DIR)
+	cp -f ./Makefile $(BUILD_DIR)/Makefile
+	cp -f ./input.txt $(BUILD_DIR)/input.txt
+	
 check:
-	./$(FILE) input.txt ${ARGS} 0 1
+	./$(EXECUTABLE) input.txt ${ARGS} 0 1
 	
 check-multiplier:
-	./$(FILE) input.txt ${ARGS1} ${ARGS2} 1
+	./$(EXECUTABLE) input.txt ${ARGS1} ${ARGS2} 1
 
 check-nosharing:
-	./$(FILE) input.txt ${ARGS} 0 0
+	./$(EXECUTABLE) input.txt ${ARGS} 0 0
 
 check-multiplier-nosharing:
-	./$(FILE) input.txt ${ARGS1} ${ARGS2} 0
+	./$(EXECUTABLE) input.txt ${ARGS1} ${ARGS2} 0
 	
 check_d:
-	gdb --args ./$(FILE) input.txt ${ARGS} 0 1
+	gdb --args $(EXECUTABLE) input.txt ${ARGS} 0 1
 
 n ?= 1
 check_r:
 	n=$(n); \
 	while [ $${n} -le ${ARGS} ] ; do \
 		echo $$n ; \
-		./$(FILE) input.txt $${n} 0 1; \
+		$(EXECUTABLE) input.txt $${n} 0 1; \
 		echo ; \
 		n=`expr $$n + 1`; \
 	done; \
@@ -50,7 +58,7 @@ check_r-nosharing:
 	n=$(n); \
 	while [ $${n} -le ${ARGS} ] ; do \
 		echo $$n ; \
-		./$(FILE) input.txt $${n} 0 0; \
+		$(EXECUTABLE) input.txt $${n} 0 0; \
 		echo ; \
 		n=`expr $$n + 1`; \
 	done; \

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <pthread.h>
 
 #include "rbarrier.h"
 
