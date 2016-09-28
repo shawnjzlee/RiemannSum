@@ -53,7 +53,7 @@ void Riemann::callback(vector<Riemann> &thread_data_vector) {
 void Riemann::do_work() {
     double local_lbound = lbound;
     for (int i = 0; i < parts; i++) {
-        lock_guard<mutex> lock(*(mutex_map.at(thread_id)));
+        // lock_guard<mutex> lock(*(mutex_map.at(thread_id)));
         local_sum += func(local_lbound) * width;
         local_lbound += width;
         curr_location = i;
