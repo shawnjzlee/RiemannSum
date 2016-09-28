@@ -103,7 +103,7 @@ int main(int argc, char * argv[]) {
         remaining_parts = partition_sz % (num_threads - 1);
     
     double normal_dist = 0.0, init_dist = 0.0;
-    if (dist_multiplier == 0) normal_dist = partition_sz / num_threads;
+    if (dist_multiplier == 0 || num_threads == 1) normal_dist = partition_sz / num_threads;
     else {
         init_dist = dist_multiplier * (partition_sz / (num_threads + dist_multiplier));
         normal_dist = (partition_sz - init_dist) / (num_threads - 1);
