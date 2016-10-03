@@ -77,7 +77,7 @@ check_r-multiplier:
 	
 check_r-multiplier-nosharing:
 	n=$(n); \
-	while [ $${n} -le ${ARGS} ] ; do \
+	while [ $${n} -le ${ARGS1} ] ; do \
 		echo $$n ; \
 		./$(EXECUTABLE) input.txt $${n} ${ARGS2} 0; \
 		echo ; \
