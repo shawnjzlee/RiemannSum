@@ -51,6 +51,7 @@ class Riemann : public ThreadData {
                                                working location */
         int parts;                          /* Total number of partitions the thread
                                                is working in */
+        char buff[100];
 };
 
 #endif /* riemann.h */
