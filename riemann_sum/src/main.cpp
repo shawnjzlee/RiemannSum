@@ -132,8 +132,7 @@ int main(int argc, char * argv[]) {
         cout << "Work Time (in secs): " << runtime.count() << endl;
     }
     else {
-        for (i = 0; i < num_norm_parts, index < num_threads - remaining_parts; 
-             index++)
+        for (i = 0; index < num_threads - remaining_parts; index++)
         {
             thread_data_vector[index].set_thread_id(index);
             if (dist_multiplier && (i == 0)) {
