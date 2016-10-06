@@ -31,7 +31,7 @@ bool Riemann::get_sharing_condition(vector<Riemann> &thread_data_vector) {
                 stolen_parts = thread_data_vector[stolen_thread_id].parts;
                 thread_data_vector[stolen_thread_id].parts /= 2;
                 stolen_curr_location = thread_data_vector[stolen_thread_id].parts;
-                // cout << "Thread " << thread_id << " is stealing from " << stolen_thread_id << endl;
+                cout << "Thread " << thread_id << " is stealing from " << stolen_thread_id << endl;
                 return true;
             }
         }
@@ -52,11 +52,16 @@ void Riemann::callback(vector<Riemann> &thread_data_vector) {
 
 void Riemann::do_work() {
     double local_lbound = lbound;
-    lock_guard<mutex> lock(*(mutex_map.at(thread_id)));
-    for (int i = 0; i < parts; i++) {
+    (*(mutex_map.at(thread_id))).lock();
+    int local_parts = parts;
+    (*(mutex_map.at(thread_id))).unlock();
+    
+    for (int i = 0; i < local_parts; i++) {
+        lock_guard<mutex> lock(*(mutex_map.at(thread_id)));
         local_sum += func(local_lbound) * width;
         local_lbound += width;
         curr_location = i;
+        if(is_shared) local_parts /= 2;
     }
 }
 
