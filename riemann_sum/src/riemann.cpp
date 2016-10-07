@@ -58,10 +58,14 @@ void Riemann::do_work() {
     
     for (int i = 0; i < local_parts; i++) {
         lock_guard<mutex> lock(*(mutex_map.at(thread_id)));
+        if (is_shared) {
+            local_parts = parts;
+            if (i == local_parts) continue;
+        }
+        
         local_sum += func(local_lbound) * width;
         local_lbound += width;
         curr_location = i;
-        if(is_shared) local_parts /= 2;
     }
 }
 
