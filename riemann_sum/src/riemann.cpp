@@ -34,9 +34,10 @@ bool Riemann::get_sharing_condition(vector<Riemann> &thread_data_vector) {
                 cout << "Thread " << thread_id << " is stealing from " << stolen_thread_id << endl;
                 return true;
             }
+            cout << "Thread " << stolen_thread_id << " not stolen because " 
+                 << thread_data_vector[stolen_thread_id].curr_location << " > " 
+                 << thread_data_vector[stolen_thread_id].parts / 2 << endl;
         }
-        cout << "Thread " << stolen_thread_id << " not stolen because " << thread_data_vector[stolen_thread_id].curr_location << " > " 
-             << thread_data_vector[stolen_thread_id].parts / 2 << endl;
         return false;
     }
     return false;

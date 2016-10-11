@@ -74,11 +74,11 @@ int main(int argc, char * argv[]) {
     
     int num_threads = 0;
     if(atoi(argv[2]) == 0) num_threads = 1;
-    // else if(atoi(argv[2]) > thread::hardware_concurrency()) {
-    //     cout << "num_threads set to maximum supported concurrent threads"
-    //          << " (" << thread::hardware_concurrency() << ") \n";
-    //     num_threads = thread::hardware_concurrency() - 1;
-    // }
+    else if(atoi(argv[2]) > thread::hardware_concurrency()) {
+        cout << "num_threads set to maximum supported concurrent threads"
+             << " (" << thread::hardware_concurrency() << ") \n";
+        num_threads = thread::hardware_concurrency() - 1;
+    }
     else num_threads = atoi(argv[2]);
     
     if(num_threads > partition_sz) num_threads = partition_sz;
